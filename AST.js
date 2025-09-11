@@ -32,8 +32,26 @@ class FunctionNode {
 
   print(){
     console.log("id: <" + this.id + ">", this.type, this.name + "()"); 
+    for(let i = 0; i < this.statements.length; i++){
+      this.statements[i].print();
+    }
   }
 
+}
+
+class StatementLeaf {
+
+  constructor(){
+    this.tokens = [];
+  }
+
+  print(){
+    console.log("\tnew statement")
+    for(let i = 0; i < this.tokens.length; i++){
+      console.log("\t\t" + this.tokens[i].name);
+    }
+
+  }
 }
 
 class AST {
@@ -63,12 +81,15 @@ class AST {
       }
 
       if(tokens[i].type == "return"){
-        if(typeof(tmp) == FunctionNode){
-          //TODO: where I left off, tmp isn't being recognised as functionNode
-          tmp.statements.push(tokens[i]);
+        if(tmp instanceof FunctionNode){
+          let x = new StatementLeaf();
+          x.tokens.push(tokens[i]);
+          while(tokens[i].type != "semicolon"){
+            x.tokens.push(tokens[++i]);
+          }
+          tmp.statements.push(x);
         }
         else {
-          console.log(tmp, typeof(tmp));
           error("cannot return outside of function");
           return;
         }
@@ -76,7 +97,7 @@ class AST {
 
       if(tokens[i].type == "open_braces"){
         //entering body
-        tmp = this.root.functions[this.root.functions.length - 1];
+        tmp = this.root.functions[0];
       }
 
       if(tokens[i].type == "close_braces"){
