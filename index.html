@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+	<title>My test page</title>
+</head>
+<body>
+	
+	<h1 id="my-heading">C compiler in JS</h1>
+	
+	<form>
+	    <!-- selection is kinda useless right now, but it's nice to keep it anyways -->
+	    <select name="target" id="target-select">
+		<option value="">--Select operating system--</option>
+		<option value="Windows">Windows</option>
+		<option value="Linux">Linux</option>
+		<option value="OSX">OS X</option>
+	    </select>
+
+	    <input type="file" id="code" name="code" accept="txt/*" />
+	</form>
+
+	<button id="compile" onclick="compile()">Compile</button>
+	<p>output</p>
+	<p id="output" ></p>
+	<script src="script.js"></script>
+</body>
+</html>
+
