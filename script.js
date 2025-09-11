@@ -46,16 +46,12 @@ function lexer(){
    //TODO: all types to be classified 
       
       case "int":
-        tokens.push({name: "int", type: "keyword"});
+        tokens.push({name: "int", type: "type"});
         break;
       
       case "float":
-        tokens.push({name: "float", type: "keyword"});
-        break;
-
-      case "main":
-        tokens.push({name: "main", type: "identifier"});
-        break;
+        tokens.push({name: "float", type: "type"});
+        break; 
 
       case "(":
         tokens.push({name: "(", type: "open_parenthesis"});
@@ -122,24 +118,26 @@ function lexer(){
         break;
 
       default:
-        //this is to throw an error at the parsing step
-        tokens.push({name: str[i], type: "???"});
+        //this will most likely be an identifier
+        tokens.push({name: str[i], type: "identifier"});
         break;
     }
-  }
-
-  for(let i = 0; i < tokens.length; i++){
-    console.log(tokens[i].name + " : " + tokens[i].type);
-  }
+  } 
   
-  console.log(tokens);
-
   output.textContent = "compiled!!"; 
+  
+  return tokens;
 
 }
 
 function compile(){
-  
-  lexer();
+
+  id = 0;
+
+  let tree = new AST(lexer());
+
+  tree.print();
+
+  //Profit???
 
 }
