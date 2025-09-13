@@ -46,10 +46,11 @@ class StatementLeaf {
   }
 
   print(){
-    console.log("\tnew statement")
+    let stmnt = "\t\t";
     for(let i = 0; i < this.tokens.length; i++){
-      console.log("\t\t" + this.tokens[i].name);
+      stmnt += this.tokens[i].name + " ";
     }
+    console.log(stmnt);
 
   }
 }

@@ -130,6 +130,30 @@ function lexer(){
 
 }
 
+let asmCode = "";
+
+function parse(tree){
+  //head of the file
+  asmCode += "\t.globl main";
+
+  for(let i = 0; i < tree.root.functions.length; i++){
+    asmCode += "\n" + tree.root.functions[i].name + ":";
+    
+    // TODO: no way to tell what the type of an expression is, no way to tell if a literal is a number or a char
+    for(let j = 0; j < tree.root.functions[i].statements.length; j++){
+      if(tree.root.functions[i].statements[j].tokens[0].type == "return"){
+        if(tree.root.functions[i].statements[j].tokens[1].type == "literal"){
+          asmCode += "\n\tmovl\t$" + tree.root.functions[i].statements[j].tokens[1].name + ", %eax";
+          asmCode += "\n\tret";
+        }
+      }
+    }
+  }
+ 
+  asmCode += "\n";
+  //show download button
+}
+
 function compile(){
 
   id = 0;
@@ -138,6 +162,15 @@ function compile(){
 
   tree.print();
 
+  parse(tree);
+
   //Profit???
 
+}
+
+async function download(){
+  let filehandle = await window.showSaveFilePicker();
+  let stream = await filehandle.createWritable();
+  await stream.write(asmCode);
+  await stream.close();
 }
