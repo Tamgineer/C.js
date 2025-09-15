@@ -27,16 +27,39 @@ class FunctionNode {
 
 class ReturnNode {
   constructor(){
-    this.expression;
+    this.expression = [];
   }
   
   print(){
-    console.log("\t\treturn " + this.expression.value + ";");
+    let x = "\t\treturn ";
+    for(let i = 0; i < this.expression.length; i++){
+      if(this.expression[i] instanceof Constant){
+        x += this.expression[i].value;
+      }
+      if(this.expression[i] instanceof UnaryOperation){
+        if(this.expression[i].operator == "NEGATION_OPERATOR"){
+          x += "-";
+        } else {
+          x += this.expression[i].operator;
+        }
+      }
+    }
+
+    console.log(x + ";");
   }
 
   generate(){
     let out = "";
-    out += "\n\tmovl\t$" + this.expression.value +", %eax";
+    // TODO: more of a try, consider recursion over doing it on a loop
+    for(let i = 0; i < this.expression.length; i++){
+      if(this.expression[i] instanceof UnaryOperation){
+        if(this.expression[i].operator == "NEGATION_OPERATOR"){
+          out += "\n\tmovl\t$" + this.expression[i+1].value +", %eax";
+          out += "\n\tneg\t%eax";
+          i+=2;
+        }
+      }
+    }
     out += "\n\tret";
     return out;
   }
@@ -53,7 +76,9 @@ class Constant{
 }
 
 class UnaryOperation{
-  
+  constructor(operator){
+    this.operator = operator;
+  }
 }
 
 class AST {
@@ -95,12 +120,32 @@ class AST {
           
           i++;
           while(tokens[i].type != "semicolon"){
+            
+            switch(tokens[i].type){
+            
+              case "NUMERIC_LITERAL":
+                x.expression.push(new Constant(tokens[i].name));
+                i++;
+                break;
+
+              case "NEGATION_OPERATOR":
+                if(x.expression[x.expression.length - 1] instanceof Constant){
+                  error("unary operator after constant");
+                }
+                x.expression.push(new UnaryOperation(tokens[i].type));
+                i++;
+                break;
+
+              default:
+              // TODO: Logical negation && bitwise complement
+                error("operator not implemented yet");
+
+            }
+
             if(tokens[i].type == "NUMERIC_LITERAL"){
-              console.log("new const")
-              x.expression = new Constant(tokens[i].name);
-              i++;
               continue;
             }
+
           }
           tmp.statements.push(x);
         }
