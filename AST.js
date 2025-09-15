@@ -3,20 +3,6 @@ function error(statement) {
   output.style.color = "red";
 }
 
-class Program {
-
-  constructor(){
-    this.functions = [];
-  }
-
-  print(){
-    for(let i = 0; i < this.functions.length; i++){
-      this.functions[i].print();
-    }
-  }
-
-}
-
 let id = 0;
 
 //TODO: currently no support for parameters, or representing them
@@ -39,20 +25,35 @@ class FunctionNode {
 
 }
 
-class StatementLeaf {
-
+class ReturnNode {
   constructor(){
-    this.tokens = [];
+    this.expression;
   }
-
+  
   print(){
-    let stmnt = "\t\t";
-    for(let i = 0; i < this.tokens.length; i++){
-      stmnt += this.tokens[i].name + " ";
-    }
-    console.log(stmnt);
-
+    console.log("\t\treturn " + this.expression.value + ";");
   }
+
+  generate(){
+    let out = "";
+    out += "\n\tmovl\t$" + this.expression.value +", %eax";
+    out += "\n\tret";
+    return out;
+  }
+
+}
+
+class Expression{
+}
+
+class Constant{
+  constructor(value){
+    this.value = value;
+  }
+}
+
+class UnaryOperation{
+  
 }
 
 class AST {
@@ -60,16 +61,16 @@ class AST {
   constructor(tokens){
   
     //AST program enter
-    this.root = new Program();
+    this.functions = [];
 
-    let tmp = this.root;
+    let tmp = this.functions;
 
     for(let i = 0; i < tokens.length; i++){
       if(tokens[i].type == "identifier"){
         //is it a function?
         if(tokens[i+1].type == "open_parenthesis"){
           if(tokens[i-1].type == "type"){
-            tmp.functions.push(new FunctionNode(tokens[i-1].name, tokens[i].name));
+            this.functions.push(new FunctionNode(tokens[i-1].name, tokens[i].name));
           }
           else {
             error("identifier " + tokens[i] + " is an undefined function");
@@ -81,12 +82,25 @@ class AST {
         }
       }
 
+      if(tokens[i].type == "semicolon"){
+        // TODO: ensure that the semicolon is in the right place
+        
+        //for the time being skip
+        return;
+      }
+
       if(tokens[i].type == "return"){
         if(tmp instanceof FunctionNode){
-          let x = new StatementLeaf();
-          x.tokens.push(tokens[i]);
+          let x = new ReturnNode();
+          
+          i++;
           while(tokens[i].type != "semicolon"){
-            x.tokens.push(tokens[++i]);
+            if(tokens[i].type == "NUMERIC_LITERAL"){
+              console.log("new const")
+              x.expression = new Constant(tokens[i].name);
+              i++;
+              continue;
+            }
           }
           tmp.statements.push(x);
         }
@@ -98,20 +112,22 @@ class AST {
 
       if(tokens[i].type == "open_braces"){
         //entering body
-        tmp = this.root.functions[0];
+        tmp = this.functions[0];
       }
 
       if(tokens[i].type == "close_braces"){
         //exiting body
-        tmp = this.root;
+        tmp = this.functions;
       }
 
     }
 
   }
-
+  
   print(){
-    this.root.print();
-  }
+    for(let i = 0; i < this.functions.length; i++){
+      this.functions[i].print();
+    }
+  } 
 
 };
